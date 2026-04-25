@@ -1,6 +1,7 @@
 ---
 name: bash-scripting
 description: Guidelines for writing production-quality bash scripts. Use whenever asked to write a bash script.
+license: MIT
 ---
 
 <role>
