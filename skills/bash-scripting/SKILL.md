@@ -136,13 +136,25 @@ set -euo pipefail
 - Keep functions short and single-purpose
 - Return status with `return`, output with `echo`
 
+## Color Codes
+
+Use ANSI color codes; auto-disabled when stdout isn't a TTY (e.g. piped to a logfile, run in CI)
+
+```bash
+BOLD=$'\e[1m'; BLUE=$'\e[34m'; GREEN=$'\e[32m'; RED=$'\e[31m'; DIM=$'\e[2m'; RESET=$'\e[0m'
+[[ -t 1 ]] || { BOLD=; BLUE=; GREEN=; RED=; DIM=; RESET=; }
+```
+
 ## Error Handling & Cleanup
 
 ```bash
-cleanup() { rm -f "$tmpfile"; }
-trap cleanup EXIT
+info() { printf '%s●%s %s%s%s\n' "$BLUE" "$RESET" "$BOLD" "$*" "$RESET"; }
+ok()   { printf '%s✓%s %s\n' "$GREEN" "$RESET" "$*"; }
+err()  { printf '%s✗%s %s\n' "$RED" "$RESET" "$*" >&2; }
 
-die() { echo "${0##*/}: error: $*" >&2; exit 1; }
+# `trap - ERR` disarms the ERR trap below so the explicit `exit 1` doesn't double-report.
+die()  { err "$*"; trap - ERR; exit 1; }
+trap 'err "script failed at line $LINENO"' ERR
 ```
 
 ## Argument Parsing Pattern
